@@ -2,17 +2,44 @@
 <head>
     <meta charset="UTF-8">
     <title>Code Contas</title>
+    <style type="text/css">
+        .pago {
+            color: green;
+        }
 
+        .naopago {
+            color: red;
+        }
+
+        .minhaclasse {
+            background-color: burlywood;
+        }
+
+        .red {
+            color: red;
+        }
+
+        .green {
+            color: green;
+        }
+
+        .gray
+        {
+            color: gray;
+        }
+    </style>
 </head>
 <body>
 <div id="app">
     <nav>
         <ul>
-            <li v-for="o in menus"><a href="#" v-on:click="showView(o.id)">{{o.name}}</a></li>
+            <li v-for="o in menus">
+                <a href="#" @click.prevent="showView(o.id)">{{o.name}}</a>
+            </li>
         </ul>
     </nav>
     <div v-if="activedView==0">
-        <h3>{{contasPagas}}</h3>
+        <h3 :class="{'gray': contasPagas===false, 'green': contasPagas===0,'red': contasPagas>0}">{{contasPagas | statusGeneral}}</h3>
         <table border="1" cellpadding="10">
             <thead>
             <tr>
@@ -21,22 +48,44 @@
                 <th>Nome</th>
                 <th>Valor</th>
                 <th>Paga?</th>
+                <th>Ações</th>
             </tr>
             </thead>
             <tbody>
             <tr v-for="(index,o) in bills">
-                <td>{{index}}</td>
+                <td>{{index + 1}}</td>
                 <td>{{o.date_due}}</td>
                 <td>{{o.name}}</td>
-                <td>{{o.value}}</td>
-                <td>{{o.done}}</td>
+                <td>{{o.value | currency 'R$' 2 }}</td>
+                <td class="minhaclasse" :class="{'pago': o.done,'naopago':!o.done}">
+                    {{o.done | doneLabel}}
+                </td>
+                <td>
+                    <a href="#" @click.prevent="loadBill(o)">Editar</a> |
+                    <a href="#" @click.prevent="deleteBill(o)">Excluir</a>
+                </td>
             </tr>
             </tbody>
         </table>
     </div>
     <div v-if="activedView==1">
-        <form action="">
-            Test: <input type="text">
+        <form name="form" @submit.prevent="submit">
+            <label for="vencimento">Vencimento</label>
+            <input type="text" v-model="bill.date_due">
+            <br/><br/>
+            <label for="nome">Nome</label>
+            <select v-model="bill.name">
+                <option v-for="o in names" :value="o">{{o}}</option>
+            </select>
+            <br/><br/>
+            <label for="valor">Valor</label>
+            <input type="text" v-model="bill.value">
+            <br/><br/>
+            <label for="done">Pago?</label>
+            <input type="checkbox" v-model="bill.done">
+            <br/><br/>
+            <input type="submit" value="Enviar">
+
         </form>
     </div>
 
